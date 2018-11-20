@@ -1,20 +1,15 @@
 import scala.collection.mutable.ListBuffer
 
 object Main {
-  def placeInFoata(transaction: Char, foata: ListBuffer[ListBuffer[Char]], dependencies: ListBuffer[(String, String)]): Unit = {
-    val transactionDependencies = dependencies.filter(dep => {
-      dep._1.equals(transaction.toString) || dep._2.equals(transaction.toString)
-    })
+  def placeInFoata(transaction: Char, foata: ListBuffer[ListBuffer[Char]], dependencies: List[(Char, Char)]): Unit = {
+    val transactionDependencies = dependencies.filter(dep => {dep._1.equals(transaction) || dep._2.equals(transaction)})
     var dependentTo = -1
     var classNumber = -1
     for (foataClass <- foata) {
       classNumber += 1
       for (element <- foataClass) {
-        for (dep <- transactionDependencies) {
-          if (dep._1.equals(element.toString) || dep._2.equals(element.toString)) {
-            dependentTo = classNumber
-          }
-        }
+        if (transactionDependencies.exists(dep => dep._1.equals(element) || dep._2.equals(element)))
+          dependentTo = classNumber
       }
     }
     if (dependentTo == foata.size - 1) {
@@ -25,14 +20,34 @@ object Main {
     }
   }
 
+  def hasse(trace: String, dependencies: List[(Char, Char)]): ListBuffer[(Char, Char)] = {
+    var min = ListBuffer.empty[Int]
+    var graph = ListBuffer.empty[(Char, Char)]
+    for (i <- trace.length - 1 to 0 by -1) {
+      min += i
+      for (n <- min) {
+        if (n != i) {
+          System.out.println(i + " " + trace(i) + " " + trace(n) + " " + min)
+          if (dependencies.contains((trace(i), trace(n)))) {
+            //System.out.println(i + " "+trace(i)+" "+trace(n) +" " + min)
+            graph += Tuple2(trace(i), trace(n))
+            min -= n
+          }
+        }
+      }
+    }
+    System.out.println(min)
+    graph
+  }
+
 
   def main(args: Array[String]): Unit = {
-    val w = "baadcb"
-    val alphabet = List("a", "b", "c", "d")
+    val w = "addacbbc"
+    val alphabet = List('a', 'b', 'c', 'd')
     val transactions = List("x:=x+y", "y:=y+2z", "x:=3x+z", "z:=y-z")
     val parsedTransactions = transactions.map(TransactionParser.parse)
-    var dependencies = ListBuffer.empty[(String, String)]
-    var independencies = ListBuffer.empty[(String, String)]
+    var dependencies = ListBuffer.empty[(Char, Char)]
+    var independencies = ListBuffer.empty[(Char, Char)]
     for (t1 <- parsedTransactions) {
       for (t2 <- parsedTransactions) {
         val i1 = alphabet(parsedTransactions.indexOf(t1))
@@ -44,17 +59,17 @@ object Main {
         }
       }
     }
-    for (d <- dependencies)
-      System.out.println(d)
+    dependencies.foreach(d => System.out.println(d))
     System.out.println()
-    for (i <- independencies)
-      System.out.println(i)
+    independencies.foreach(i => System.out.println(i))
     System.out.println()
     var foata = ListBuffer.empty[ListBuffer[Char]]
     for (i <- 0 until w.length) {
-      placeInFoata(w(i), foata, dependencies)
+      placeInFoata(w(i), foata, dependencies.toList)
     }
-    for (f <- foata)
-      System.out.println(f)
+    foata.foreach(f => System.out.println(f.toList))
+    System.out.println()
+    val graph = hasse(w, dependencies.toList)
+    System.out.println(graph)
   }
 }
