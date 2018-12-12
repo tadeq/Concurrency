@@ -1,17 +1,18 @@
 public class CalculateCoefsTask implements Runnable {
-    private int i;
-    private int j;
+
+    private int row;
+    private int column;
     private double[][] matrix;
     private double[] coefs;
 
-    public CalculateCoefsTask(int i, int j, double[][] matrix, double[] coefs) {
-        this.i = i;
-        this.j = j;
+    CalculateCoefsTask(int row, int column, double[][] matrix, double[] coefs) {
+        this.row = row;
+        this.column = column;
         this.matrix = matrix;
         this.coefs = coefs;
     }
 
     public void run() {
-        coefs[i] = matrix[j][i] / matrix[i][i];
+        coefs[row] = matrix[row][column] / matrix[column][column];
     }
 }

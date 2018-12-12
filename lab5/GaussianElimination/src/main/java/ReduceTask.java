@@ -1,16 +1,17 @@
 public class ReduceTask implements Runnable {
-    private int i;
+
+    private int row;
     private double[][] matrix;
     private double[] vector;
 
-    public ReduceTask(int i, double[][] matrix, double[] vector) {
-        this.i = i;
+    ReduceTask(int row, double[][] matrix, double[] vector) {
+        this.row = row;
         this.matrix = matrix;
         this.vector = vector;
     }
 
     public void run() {
-        vector[i] = vector[i] / matrix[i][i];
-        matrix[i][i] = 1;
+        vector[row] /= matrix[row][row];
+        matrix[row][row] = 1;
     }
 }
